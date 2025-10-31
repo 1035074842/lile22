@@ -1,15 +1,15 @@
 export async function onRequestGet(context) {
     const { env } = context;
     
+    // 调试：检查环境变量中是否有KV_STORAGE
+    const hasKV = typeof env.KV_STORAGE !== 'undefined';
+    
     try {
-        // 检查 KV 存储是否可用
-        if (!env.KV_STORAGE) {
-            throw new Error('KV_STORAGE 未正确配置');
+        if (!hasKV) {
+            throw new Error('KV_STORAGE 环境变量未定义');
         }
-        
+
         const existingRecords = await env.KV_STORAGE.get('checkin_records');
-        console.log('从KV获取的记录:', existingRecords);
-        
         const records = existingRecords ? JSON.parse(existingRecords) : [];
         
         return new Response(JSON.stringify({
@@ -23,10 +23,11 @@ export async function onRequestGet(context) {
         });
         
     } catch (error) {
-        console.error('获取记录详细错误:', error);
+        console.error('获取记录错误:', error);
         return new Response(JSON.stringify({
             success: false,
-            msg: `获取记录失败: ${error.message}`
+            msg: `获取记录失败: ${error.message}`,
+            debug: { hasKV } // 返回调试信息
         }), {
             status: 500,
             headers: {
