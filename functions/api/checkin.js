@@ -35,8 +35,7 @@ export async function onRequestPost(context) {
         records.push(newRecord);
         
         // 保存回KV
-        await env.KV_STORAGE.put('checkin_records', JSON.stringify(records));
-        
+        await env.KV_STORAGE.put('checkin_records', JSON.stringify(records));        
         return new Response(JSON.stringify({
             success: true,
             msg: `打卡成功！${gameName} 在 ${map} 地图完成打卡`

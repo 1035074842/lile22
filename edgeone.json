@@ -10,7 +10,7 @@
   "env": {
     "KV_STORAGE": {
       "type": "kv",
-      "namespace": "checkin-storage"
+      "namespace": "checkin_records"
     }
   }
 }
