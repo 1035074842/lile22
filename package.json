@@ -1,0 +1,12 @@
+{
+  "name": "tactical-squad-checkin",
+  "version": "1.0.0",
+  "description": "战术小队H战队OP打卡系统",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Build completed'",
+    "dev": "echo 'Development mode'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

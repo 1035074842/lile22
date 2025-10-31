@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": ["/assets/*"],
+  "rules": [
+    {
+      "match": "/api/*",
+      "function": "api"
+    },
+    {
+      "match": "/health",
+      "function": "health"
+    },
+    {
+      "match": "/*",
+      "status": 200
+    }
+  ]
+}

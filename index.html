@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>战术小队H战队-OP打卡</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", Arial, sans-serif; }
+        body { background-color: #1a1a2e; color: #fff; min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #16213e; border-radius: 16px; padding: 30px; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+        .team-title { text-align: center; margin-bottom: 30px; font-size: 28px; color: #00ff9d; text-shadow: 0 0 8px rgba(0,255,157,0.5); }
+        
+        /* 打卡表单样式 */
+        .checkin-form { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-label { font-size: 18px; color: #e94560; }
+        .form-input, .form-select { padding: 12px 16px; border-radius: 8px; border: none; font-size: 16px; background: #0f3460; color: #fff; }
+        .form-input:disabled, .form-select:disabled { background: #2a4365; cursor: not-allowed; }
+        .checkin-btn { padding: 14px; border-radius: 8px; border: none; background: #00ff9d; color: #1a1a2e; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .checkin-btn:disabled { background: #00cc7f; cursor: not-allowed; }
+        
+        /* 历史记录控制区 */
+        .record-control { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .view-record-btn { padding: 12px 24px; border-radius: 8px; border: none; background: #e94560; color: #fff; font-size: 16px; cursor: pointer; }
+        .stat-btn { padding: 12px 24px; border-radius: 8px; border: none; background: #3a86ff; color: #fff; font-size: 16px; cursor: pointer; }
+        
+        /* 历史记录列表 */
+        .record-list { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; margin-top: 20px; background: #0f3460; border-radius: 8px; padding: 0 16px; }
+        .record-list.show { max-height: 600px; padding: 16px; }
+        .record-title { text-align: center; margin-bottom: 16px; font-size: 18px; color: #e94560; }
+        
+        /* 日期分组样式 */
+        .date-group { margin-bottom: 20px; }
+        .date-group-header { padding: 8px 12px; background: #16213e; border-radius: 6px; margin-bottom: 10px; font-weight: 600; color: #00ff9d; }
+        .date-group-content { padding-left: 10px; }
+        
+        /* 单条记录样式 */
+        .record-item { padding: 12px; border-bottom: 1px solid #2a4365; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .record-item:last-child { border-bottom: none; }
+        .record-item:hover { background: #16213e; border-radius: 4px; }
+        .record-name { font-size: 16px; }
+        .record-time { font-size: 14px; color: #a0aec0; }
+        
+        /* 状态消息 */
+        .loading { text-align: center; padding: 20px; color: #00ff9d; }
+        .error { text-align: center; padding: 20px; color: #e94560; }
+        .success { text-align: center; padding: 20px; color: #00ff9d; }
+        
+        /* 响应式适配 */
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            .team-title { font-size: 24px; }
+            .form-label { font-size: 16px; }
+            .checkin-btn, .view-record-btn, .stat-btn { font-size: 16px; padding: 10px 18px; }
+            .record-control { flex-direction: column; gap: 10px; }
+            .record-name { font-size: 14px; }
+            .record-time { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="team-title">战术小队 H战队 OP打卡</h1>
+        
+        <!-- 打卡表单 -->
+        <div class="checkin-form">
+            <div class="form-group">
+                <label class="form-label" for="gameName">游戏名称</label>
+                <input type="text" id="gameName" class="form-input" placeholder="请输入你的游戏ID" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="checkinMap">打卡地图</label>
+                <select id="checkinMap" class="form-select" required>
+                    <option value="">请选择本次OP打卡地图</option>
+                    <option value="Al Basrah">Al Basrah（阿尔巴士拉）</option>
+                    <option value="Fallujah">Fallujah（费卢杰）</option>
+                    <option value="Chora">Chora（乔拉）</option>
+                    <option value="Narva">Narva（纳尔瓦）</option>
+                    <option value="Yehorivka">Yehorivka（叶霍里夫卡）</option>
+                    <option value="Kashan Desert">Kashan Desert（卡尚沙漠）</option>
+                    <option value="Mestia">Mestia（梅斯蒂亚）</option>
+                    <option value="Skorpo">Skorpo（斯科尔波）</option>
+                    <option value="Tallil Outskirts">Tallil Outskirts（塔利勒郊区）</option>
+                    <option value="Fool's Road">Fool's Road（愚人之路）</option>
+                    <option value="Gaza Beach">Gaza Beach（加沙海滩）</option>
+                    <option value="Kamdesh">Kamdesh（坎德什）</option>
+                    <option value="Lashkar Valley">Lashkar Valley（拉什卡尔山谷）</option>
+                    <option value="Manhattan">Manhattan（曼哈顿）</option>
+                    <option value="Sinnai">Sinnai（西奈）</option>
+                    <option value="Talil Airfield">Talil Airfield（塔利勒机场）</option>
+                    <option value="Al Mutrah">Al Mutrah（穆特拉）</option>
+                    <option value="Operation Marlin">Operation Marlin（马林行动）</option>
+                    <option value="Insurgency">Insurgency（叛乱）</option>
+                    <option value="Kargha Castle">Kargha Castle（卡尔加城堡）</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="checkinDate">打卡日期</label>
+                <input type="date" id="checkinDate" class="form-input" required>
+            </div>
+            <button id="checkinBtn" class="checkin-btn">提交打卡</button>
+        </div>
+        <!-- 历史记录控制 -->
+        <div class="record-control">
+            <button id="viewRecordBtn" class="view-record-btn">查看打卡历史</button>
+            <button id="statBtn" class="stat-btn">统计30天少打卡成员</button>
+        </div>
+        <!-- 历史记录列表 -->
+        <div id="recordList" class="record-list">
+            <h3 class="record-title">H战队OP打卡记录（按日期分组）</h3>
+            <div id="recordContent"></div>
+        </div>
+    </div>
+    <script>
+        // 使用相对路径作为后端地址 - 修复了API路径问题
+        const BACKEND_URL = '';
+        const today = new Date().toISOString().split('T')[0];
+
+        // 初始化元素
+        const gameNameInput = document.getElementById('gameName');
+        const checkinMapSelect = document.getElementById('checkinMap');
+        const checkinDateInput = document.getElementById('checkinDate');
+        const checkinBtn = document.getElementById('checkinBtn');
+        const viewRecordBtn = document.getElementById('viewRecordBtn');
+        const statBtn = document.getElementById('statBtn');
+        const recordList = document.getElementById('recordList');
+        const recordContent = document.getElementById('recordContent');
+
+        // 页面加载初始化
+        function init() {
+            checkinDateInput.value = today;
+            checkinDateInput.disabled = true;
+            
+            checkinBtn.addEventListener('click', handleCheckin);
+            viewRecordBtn.addEventListener('click', toggleRecordList);
+            statBtn.addEventListener('click', statLowCheckinMembers);
+            
+            console.log('前端初始化完成，使用相对路径API');
+        }
+
+        // 处理打卡
+        async function handleCheckin() {
+            const gameName = gameNameInput.value.trim();
+            const checkinMap = checkinMapSelect.value;
+            const checkinDate = today;
+            const checkinTime = new Date().toLocaleTimeString();
+
+            if (!gameName) {
+                alert('请输入你的游戏名称！');
+                return;
+            }
+            if (!checkinMap) {
+                alert('请选择本次OP打卡地图！');
+                return;
+            }
+
+            // 禁用按钮防止重复提交
+            checkinBtn.disabled = true;
+            checkinBtn.textContent = '提交中...';
+
+            try {
+                // 使用相对路径 - 修复了网络连接问题
+                const response = await fetch(`/api/checkin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gameName, map: checkinMap, date: checkinDate, time: checkinTime })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.msg);
+                    gameNameInput.value = '';
+                    checkinMapSelect.value = '';
+                    // 如果记录列表是展开的，刷新记录
+                    if (recordList.classList.contains('show')) {
+                        renderRecordsByDate();
+                    }
+                } else {
+                    alert('打卡失败：' + result.msg);
+                }
+            } catch (error) {
+                console.error('打卡错误:', error);
+                alert('打卡失败：网络错误，请检查网络连接！');
+            } finally {
+                checkinBtn.disabled = false;
+                checkinBtn.textContent = '提交打卡';
+            }
+        }
+
+        // 从后端获取所有记录并按日期分组渲染
+        async function renderRecordsByDate() {
+            recordContent.innerHTML = '<div class="loading">加载中...</div>';
+            
+            try {
+                // 使用相对路径 - 修复了网络连接问题
+                const response = await fetch(`/api/records`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    recordContent.innerHTML = '<div class="error">获取记录失败：' + result.msg + '</div>';
+                    return;
+                }
+
+                const records = result.data;
+
+                if (records.length === 0) {
+                    recordContent.innerHTML = '<div class="record-item">暂无打卡记录</div>';
+                    return;
+                }
+
+                // 按日期倒序排序
+                records.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // 按日期分组
+                const dateGroupMap = {};
+                records.forEach(record => {
+                    if (!dateGroupMap[record.date]) {
+                        dateGroupMap[record.date] = [];
+                    }
+                    dateGroupMap[record.date].push(record);
+                });
+
+                // 渲染分组记录
+                let groupHtml = '';
+                Object.keys(dateGroupMap).forEach(date => {
+                    const groupRecords = dateGroupMap[date];
+                    groupRecords.sort((a, b) => new Date(`2000-01-01 ${b.time}`) - new Date(`2000-01-01 ${a.time}`));
+                    
+                    groupHtml += `
+                        <div class="date-group">
+                            <div class="date-group-header">${formatDate(date)}（共${groupRecords.length}人打卡）</div>
+                            <div class="date-group-content">
+                                ${groupRecords.map((record, idx) => `
+                                    <div class="record-item" onclick="showRecordDetail('${JSON.stringify(record).replace(/'/g, "\\'")}')">
+                                        <span class="record-name">${idx + 1}. ${record.gameName}（${record.map}）</span>
+                                        <span class="record-time">${record.time}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                recordContent.innerHTML = groupHtml;
+            } catch (error) {
+                console.error('加载记录错误:', error);
+                recordContent.innerHTML = '<div class="error">加载记录失败：网络错误，请检查服务器连接</div>';
+            }
+        }
+
+        // 统计30天内打卡少于5次的成员
+        async function statLowCheckinMembers() {
+            try {
+                // 使用相对路径 - 修复了网络连接问题
+                const response = await fetch(`/api/stats`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert('统计失败：' + result.msg);
+                    return;
+                }
+
+                const { memberStats, period } = result.data;
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+                // 筛选打卡少于5次的成员
+                const lowCheckinMembers = Object.entries(memberStats)
+                    .filter(([_, count]) => count < 5)
+                    .sort((a, b) => a[1] - b[1]);
+
+                let statResult = `30天内（${formatDate(thirtyDaysAgoStr)} - ${formatDate(today)}）打卡少于5次的成员：\n\n`;
+                if (lowCheckinMembers.length === 0) {
+                    statResult += '所有成员30天内打卡次数均≥5次，执行力满分！';
+                } else {
+                    lowCheckinMembers.forEach(([name, count], idx) => {
+                        statResult += `${idx + 1}. ${name}：${count}次\n`;
+                    });
+                }
+                alert(statResult);
+            } catch (error) {
+                console.error('统计错误:', error);
+                alert('统计失败：网络错误！');
+            }
+        }
+
+        // 辅助函数
+        function formatDate(dateStr) {
+            const [year, month, day] = dateStr.split('-');
+            return `${year}年${month}月${day}日`;
+        }
+
+        function showRecordDetail(recordStr) {
+            const record = JSON.parse(recordStr);
+            alert(`
+                游戏名称：${record.gameName}
+                打卡地图：${record.map}
+                打卡日期：${formatDate(record.date)}
+                打卡时间：${record.time}
+            `);
+        }
+
+        function toggleRecordList() {
+            recordList.classList.toggle('show');
+            viewRecordBtn.textContent = recordList.classList.contains('show') 
+                ? '隐藏打卡历史' 
+                : '查看打卡历史';
+            if (recordList.classList.contains('show')) {
+                renderRecordsByDate();
+            }
+        }
+
+        // 全局暴露方法
+        window.showRecordDetail = showRecordDetail;
+        window.onload = init;
+    </script>
+</body>
+</html>
